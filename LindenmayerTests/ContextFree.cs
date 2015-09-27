@@ -221,31 +221,4 @@ namespace LindenmayerTests {
 			Assert.IsTrue(Utility.compareStates(expected, LS.getState()));
 		}
 	}
-
-	public class DerivedModule : Module {
-		int param;
-
-		public DerivedModule(char sig, int p) : base(sig) {
-			param = p;
-		}
-
-		public override string ToString() {
-			return signature.ToString() + "(" + param + ")";
-		}
-
-		public override bool Equals(object obj) {
-			DerivedModule other = obj as DerivedModule;
-			if (other != null) {
-				if (base.Equals(obj))
-					if (this.param == other.param)
-						return true;
-			}
-
-			return false;
-		}
-
-		public override int GetHashCode() {
-			return signature.GetHashCode() * 7 + param;
-		}
-	}
 }

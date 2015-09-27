@@ -50,9 +50,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="DerivedModule.cs" />
     <Compile Include="ModuleTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ContextFree.cs" />
+    <Compile Include="ContextSensitive.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>

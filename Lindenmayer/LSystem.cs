@@ -75,13 +75,24 @@ namespace Lindenmayer {
 			// Iterate over the current state
 			int i = 0;
 			Module m = null;
+			Module left = null;
+			Module right = null;
+
+			if (currentState.Count > 1)
+				right = currentState[1];
+
 			while (i < currentState.Count) {
 				m = currentState[i];
 				int stepSize = 1;
 
+				if (i + 1 < currentState.Count)
+					right = currentState[i + 1];
+				else
+					right = null;
+
 				// Check the current symbol against all productions
 				foreach (Production p in P) {
-					if (p.isMatch(null, m, null)) {
+					if (p.isMatch(left, m, right)) {
 						// Remove the old module
 						currentState.RemoveAt(i);
 
@@ -92,6 +103,7 @@ namespace Lindenmayer {
 					}
 				}
 
+				left = m;
 				i += stepSize;
 			}
 		}
