@@ -14,12 +14,27 @@ namespace Lindenmayer {
 		/// The set of modules which will replace the matched module (not the
 		/// contexts).  An empty successor means the module will be deleted.
 		/// </summary>
-		public List<Module> successor { get; set; }
+		public virtual List<Module> successor { get; set; }
 
 		/// <summary>
-		/// Initializes the production.  The left, match, and right modules must
-		/// be given during construction.  Left and Right can be null, but a Match
-		/// must be given.
+		/// Initialized the production to be context-free.  The match module must
+		/// not be null.
+		/// </summary>
+		/// <param name="m">Module to check against</param>
+		public Production(Module m) {
+			if (m == null)
+				throw new System.ArgumentNullException("m",
+					"A match module must be given");
+
+			match = m;
+
+			successor = new List<Module>();
+		}
+
+		/// <summary>
+		/// Initializes the production to be context-sensitive.  The left, match, 
+		/// and right modules must be given during construction.  Left and/or Right 
+		/// can be null, but a Match is required.
 		/// </summary>
 		/// <param name="left">Optional left context</param>
 		/// <param name="m">Module to match with</param>

@@ -10,21 +10,11 @@ namespace Lindenmayer {
 	/// </summary>
 	public class LSystem {
 		// Standard L-System Tuple
-		private HashSet<Module> V = null; // System alphabet
 		private List<Production> P = null; // System productions
 		private List<Module> currentState = null; // System state
 
 		public LSystem() {
-			V = new HashSet<Module>();
 			P = new List<Production>();
-		}
-
-		/// <summary>
-		/// Adds a module to the alphabet for this system
-		/// </summary>
-		/// <param name="symbol">The module to add</param>
-		public void addModule(Module symbol) {
-			V.Add(symbol);
 		}
 
 		/// <summary>
