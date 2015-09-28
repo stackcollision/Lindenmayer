@@ -11,7 +11,7 @@ namespace LindenmayerTests {
 	/// A simple parametric module for testing
 	/// </summary>
 	public class DerivedModule : Module {
-		int param;
+		public int param;
 
 		public DerivedModule(char sig, int p)
 			: base(sig) {

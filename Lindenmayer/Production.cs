@@ -6,9 +6,21 @@ using System.Threading.Tasks;
 
 namespace Lindenmayer {
 	public class Production {
+		/// <summary>
+		/// Used to compare two modules.
+		/// </summary>
+		/// <param name="expected">The match module stored in the production</param>
+		/// <param name="actual">The module found in the sequence</param>
+		/// <returns>True if the desired condition is satisfied</returns>
+		public delegate bool Comparator(Module expected, Module actual);
+
 		private readonly Module leftContext;
 		private readonly Module match;
 		private readonly Module rightContext;
+
+		public Comparator leftCompare = null;
+		public Comparator matchCompare = null;
+		public Comparator rightCompare = null;
 		
 		/// <summary>
 		/// The set of modules which will replace the matched module (not the
@@ -59,10 +71,30 @@ namespace Lindenmayer {
 		/// <param name="right">The module to the right of the current one</param>
 		/// <returns></returns>
 		public bool isMatch(Module left, Module m, Module right) {
-			return
-				(leftContext == null || leftContext.Equals(left)) &&
-				(rightContext == null || rightContext.Equals(right)) &&
-				match.Equals(m);
+			if (leftContext != null) {
+				if (leftCompare != null) {
+					if (leftCompare(leftContext, left) == false)
+						return false;
+				} else {
+					if (leftContext.Equals(left) == false)
+						return false;
+				}
+			}
+
+			if (rightContext != null) {
+				if (rightCompare != null) {
+					if (rightCompare(rightContext, right) == false)
+						return false;
+				} else {
+					if (rightContext.Equals(right) == false)
+						return false;
+				}
+			}
+
+			if (matchCompare != null)
+				return matchCompare(match, m);
+			else
+				return match.Equals(m);
 		}
 	}
 }
