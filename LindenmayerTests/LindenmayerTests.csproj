@@ -57,6 +57,7 @@
     <Compile Include="ContextSensitive.cs" />
     <Compile Include="StochasticTests.cs" />
     <Compile Include="ProductionTests.cs" />
+    <Compile Include="OtherSystemTests.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -26,7 +26,7 @@ namespace Lindenmayer {
 	/// You should also override the Equals method for your types to make sure they
 	/// are being compared correctly
 	/// </summary>
-	public class Module {
+	public class Module : ICloneable {
 		public char signature;
 
 		public Module(char sig) {
@@ -56,6 +56,10 @@ namespace Lindenmayer {
 
 		public override int GetHashCode() {
 			return signature.GetHashCode();
+		}
+
+		public object Clone() {
+			return this.MemberwiseClone();
 		}
 	}
 }

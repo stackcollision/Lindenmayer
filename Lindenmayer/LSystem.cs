@@ -6,12 +6,68 @@ using System.Threading.Tasks;
 
 namespace Lindenmayer {
 	/// <summary>
-	/// Base class for a Lindenmayer System
+	/// A Lindenmayer string re-writing system.  This class performs the actual
+	/// incrementing of the system with the help of its support classes (Module,
+	/// Production).
+	/// 
+	/// Every time step is called every module in the current state is iterated over
+	/// and a relevant production is searched for.  If one matches, that rule is
+	/// applied to the module.
+	/// 
+	/// Two optional callbacks can be provided: Goals and Constraints.  If they are
+	/// not provided, their slot in the flowchart is skipped.
+	/// 
+	/// Step:
+	/// Ideal Successor -> Goals Function -> Constraints Function
+	/// 
+	/// After each module is processed, it is sent to an optional user TrackCallback
+	/// which can be used to dynamically track the turtle's position, instead of
+	/// calculating it every time from the full state.
 	/// </summary>
 	public class LSystem {
+		/// <summary>
+		/// User-defined function which can implement goals for the system.  Called
+		/// immediately after the production of the ideal successor.  Cannot modify
+		/// the state of the system, but can make changes to the list of successor
+		/// modules before they are inserted.
+		/// </summary>
+		/// <param name="state">The read-only state of the system before the
+		/// current module has been removed</param>
+		/// <param name="pos">The index of the current module which is about to
+		/// be replaced</param>
+		/// <param name="idealSuccessor">The module(s) which will replace the
+		/// current module</param>
+		public delegate void GoalsFunction(
+			IList<Module> state, int pos, List<Module> idealSuccessor);
+
+		/// <summary>
+		/// User-defined function which can implement constraints for the system.
+		/// Called immediately after the goals function (if there is none provided,
+		/// this is called after the ideal successor is generated).  Almost identical
+		/// to the GoalsFunction, except for its calling order.
+		/// </summary>
+		/// <param name="state"></param>
+		/// <param name="pos"></param>
+		/// <param name="successor"></param>
+		public delegate void ConstraintsFunction(
+			IList<Module> state, int pos, List<Module> successor);
+
+		/// <summary>
+		/// Optional callback to allow the user to dynamically track the position
+		/// instead of having to recalculate it every time from the full state.
+		/// Not really necessary unless you are using Goals and/or Constraints.
+		/// </summary>
+		/// <param name="lastModule"></param>
+		public delegate void TrackFunction(Module lastModule);
+
 		// Standard L-System Tuple
 		private List<Production> P = null; // System productions
 		private List<Module> currentState = null; // System state
+		
+		// User-provided callbacks
+		public GoalsFunction GoalsCallback = null;
+		public ConstraintsFunction ConstraintsCallback = null;
+		public TrackFunction TrackCallback = null;
 
 		public LSystem() {
 			P = new List<Production>();
@@ -73,7 +129,7 @@ namespace Lindenmayer {
 
 			while (i < currentState.Count) {
 				m = currentState[i];
-				int stepSize = 1;
+				int skip = 1;
 
 				if (i + 1 < currentState.Count)
 					right = currentState[i + 1];
@@ -83,19 +139,45 @@ namespace Lindenmayer {
 				// Check the current symbol against all productions
 				foreach (Production p in P) {
 					if (p.isMatch(left, m, right)) {
+						// Get the ideal successor
+						List<Module> successor = copySuccessor(p.successor);
+						IList<Module> roState = currentState.AsReadOnly();
+						
+						// Check goals
+						if(GoalsCallback != null)
+							GoalsCallback(roState, i, successor);
+
+						if(ConstraintsCallback != null)
+							ConstraintsCallback(roState, i, successor);
+
 						// Remove the old module
 						currentState.RemoveAt(i);
 
-						// Insert the successor modules
-						currentState.InsertRange(i, p.successor);
-						stepSize = p.successor.Count;
+						// Insert the successor module(s)
+						currentState.InsertRange(i, successor);
+						skip = successor.Count;
+
 						break;
 					}
 				}
 
+				// Call the track function for each module we inserted
+				if (TrackCallback != null) {
+					for (int j = i; j < i + skip; ++j) {
+						TrackCallback(currentState[j]);
+					}
+				}
+
 				left = m;
-				i += stepSize;
+				i += skip;
 			}
+		}
+
+		private List<Module> copySuccessor(List<Module> successor) {
+			List<Module> copy = new List<Module>();
+			foreach (Module m in successor)
+				copy.Add(m.Clone() as Module);
+			return copy;
 		}
 	}
 }
