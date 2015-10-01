@@ -43,18 +43,17 @@ namespace LindenmayerTests {
 		}
 
 		/// <summary>
-		/// Tests Goal and Constraint functions' ability to change successor
+		/// Tests Goal function's ability to change successor
 		/// </summary>
 		[TestMethod]
-		public void GoalsConstraints() {
+		public void Goals() {
 			// Rule 1: A -> B(10)
 			Production P1 = new Production(new Module('A'));
 			P1.successor.Add(new DerivedModule('B', 10));
+			P1.SuccessorCallback = GoalsTest;
 
 			LSystem LS = new LSystem();
 			LS.addProduction(P1);
-			LS.GoalsCallback = GoalsTest;
-			LS.ConstraintsCallback = ConstraintsTest;
 
 			List<Module> axiom = new List<Module>() {
 				new Module('A'),
@@ -68,7 +67,7 @@ namespace LindenmayerTests {
 			List<Module> expected = new List<Module>() {
 				new DerivedModule('B', 21),
 				new DerivedModule('B', 22),
-				new DerivedModule('B', 22)
+				new DerivedModule('B', 23)
 			};
 			Assert.IsTrue(Utility.compareStates(expected, LS.getState()));
 		}
@@ -91,13 +90,6 @@ namespace LindenmayerTests {
 				}
 
 				goalState++;
-		}
-
-		private void ConstraintsTest
-			(IList<Module> state, int pos, List<Module> successor) {
-				DerivedModule m = successor[0] as DerivedModule;
-				if (m.param > 22)
-					m.param = 22;
 		}
 
 		/// <summary>

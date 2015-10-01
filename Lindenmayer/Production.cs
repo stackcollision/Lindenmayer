@@ -14,6 +14,21 @@ namespace Lindenmayer {
 		/// <returns>True if the desired condition is satisfied</returns>
 		public delegate bool Comparator(Module expected, Module actual);
 
+		/// <summary>
+		/// User-defined function which can make the successor more dynamic.  Called
+		/// immediately after the production of the ideal successor.  Cannot modify
+		/// the state of the system, but can make changes to the list of successor
+		/// modules before they are inserted.
+		/// </summary>
+		/// <param name="state">The read-only state of the system before the
+		/// current module has been removed</param>
+		/// <param name="pos">The index of the current module which is about to
+		/// be replaced</param>
+		/// <param name="idealSuccessor">The module(s) which will replace the
+		/// current module</param>
+		public delegate void SuccessorFunction(
+			IList<Module> state, int pos, List<Module> idealSuccessor);
+
 		private readonly Module leftContext;
 		private readonly Module match;
 		private readonly Module rightContext;
@@ -21,6 +36,8 @@ namespace Lindenmayer {
 		public Comparator leftCompare = null;
 		public Comparator matchCompare = null;
 		public Comparator rightCompare = null;
+
+		public SuccessorFunction SuccessorCallback = null;
 		
 		/// <summary>
 		/// The set of modules which will replace the matched module (not the

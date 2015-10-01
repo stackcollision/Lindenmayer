@@ -14,43 +14,11 @@ namespace Lindenmayer {
 	/// and a relevant production is searched for.  If one matches, that rule is
 	/// applied to the module.
 	/// 
-	/// Two optional callbacks can be provided: Goals and Constraints.  If they are
-	/// not provided, their slot in the flowchart is skipped.
-	/// 
-	/// Step:
-	/// Ideal Successor -> Goals Function -> Constraints Function
-	/// 
 	/// After each module is processed, it is sent to an optional user TrackCallback
 	/// which can be used to dynamically track the turtle's position, instead of
 	/// calculating it every time from the full state.
 	/// </summary>
 	public class LSystem {
-		/// <summary>
-		/// User-defined function which can implement goals for the system.  Called
-		/// immediately after the production of the ideal successor.  Cannot modify
-		/// the state of the system, but can make changes to the list of successor
-		/// modules before they are inserted.
-		/// </summary>
-		/// <param name="state">The read-only state of the system before the
-		/// current module has been removed</param>
-		/// <param name="pos">The index of the current module which is about to
-		/// be replaced</param>
-		/// <param name="idealSuccessor">The module(s) which will replace the
-		/// current module</param>
-		public delegate void GoalsFunction(
-			IList<Module> state, int pos, List<Module> idealSuccessor);
-
-		/// <summary>
-		/// User-defined function which can implement constraints for the system.
-		/// Called immediately after the goals function (if there is none provided,
-		/// this is called after the ideal successor is generated).  Almost identical
-		/// to the GoalsFunction, except for its calling order.
-		/// </summary>
-		/// <param name="state"></param>
-		/// <param name="pos"></param>
-		/// <param name="successor"></param>
-		public delegate void ConstraintsFunction(
-			IList<Module> state, int pos, List<Module> successor);
 
 		/// <summary>
 		/// Optional callback to allow the user to dynamically track the position
@@ -65,8 +33,6 @@ namespace Lindenmayer {
 		private List<Module> currentState = null; // System state
 		
 		// User-provided callbacks
-		public GoalsFunction GoalsCallback = null;
-		public ConstraintsFunction ConstraintsCallback = null;
 		public TrackFunction TrackCallback = null;
 
 		public LSystem() {
@@ -142,13 +108,10 @@ namespace Lindenmayer {
 						// Get the ideal successor
 						List<Module> successor = copySuccessor(p.successor);
 						IList<Module> roState = currentState.AsReadOnly();
-						
-						// Check goals
-						if(GoalsCallback != null)
-							GoalsCallback(roState, i, successor);
 
-						if(ConstraintsCallback != null)
-							ConstraintsCallback(roState, i, successor);
+						// Call the production's callback
+						if (p.SuccessorCallback != null)
+							p.SuccessorCallback(roState, i, successor);
 
 						// Remove the old module
 						currentState.RemoveAt(i);
